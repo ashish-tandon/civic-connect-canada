@@ -1,10 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
 export const useGeolocation = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const getLocation = useCallback(() => {
+  const getLocation = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported by your browser'));
@@ -12,29 +11,34 @@ export const useGeolocation = () => {
       }
 
       setLoading(true);
-      setError(null);
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setLoading(false);
           resolve({
             latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            longitude: position.coords.longitude,
           });
         },
         (error) => {
           setLoading(false);
-          setError(error.message);
-          reject(error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              reject(new Error('Please allow location access to use this feature'));
+              break;
+            case error.POSITION_UNAVAILABLE:
+              reject(new Error('Location information is unavailable'));
+              break;
+            case error.TIMEOUT:
+              reject(new Error('Location request timed out'));
+              break;
+            default:
+              reject(new Error('An unknown error occurred'));
+          }
         }
       );
     });
-  }, []);
+  };
 
-  return { getLocation, loading, error };
+  return { getLocation, loading };
 }; 

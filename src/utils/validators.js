@@ -1,7 +1,13 @@
 export const validators = {
   postalCode: (code) => {
-    const regex = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
-    return regex.test(code);
+    if (!code) return false;
+    
+    // Remove spaces and convert to uppercase
+    const formatted = code.replace(/\s/g, '').toUpperCase();
+    
+    // Canadian postal code format: A1A1A1 or A1A 1A1
+    const regex = /^[A-Z][0-9][A-Z][ ]?[0-9][A-Z][0-9]$/;
+    return regex.test(formatted);
   },
 
   coordinates: (lat, lng) => {
