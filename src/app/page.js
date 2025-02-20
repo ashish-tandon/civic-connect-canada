@@ -91,7 +91,7 @@ export default function Home() {
         variants={staggerContainer}
       >
         <AnimatePresence>
-          {cardData.map((card, index) => (
+          {cardData.map((card) => (
             <Card
               key={card.title}
               variants={fadeIn}

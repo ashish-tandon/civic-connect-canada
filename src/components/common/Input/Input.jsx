@@ -1,30 +1,33 @@
+'use client';
+
 import React from 'react';
 import styled from 'styled-components';
 
 const StyledInput = styled.input`
+  width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--text-secondary)20;
   border-radius: 8px;
   font-size: 1rem;
-  width: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   transition: all 0.2s ease;
 
   &:focus {
     outline: none;
-    border-color: #2c5282;
-    box-shadow: 0 0 0 1px #2c5282;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary)20;
   }
 
   &::placeholder {
-    color: #a0aec0;
+    color: var(--text-secondary);
   }
 `;
 
-export const Input = React.forwardRef(({ error, ...props }, ref) => {
-  return (
-    <div>
-      <StyledInput ref={ref} {...props} />
-      {error && <span className="error">{error}</span>}
-    </div>
-  );
-}); 
+const Input = React.forwardRef((props, ref) => (
+  <StyledInput ref={ref} {...props} />
+));
+
+Input.displayName = 'Input';
+
+export default Input; 

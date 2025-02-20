@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
@@ -26,12 +27,14 @@ const Card = styled(motion.div)`
 const PhotoContainer = styled.div`
   text-align: center;
   margin-bottom: 1.5rem;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-left: auto;
+  margin-right: auto;
 
   img {
-    width: 120px;
-    height: 120px;
     border-radius: 50%;
-    object-fit: cover;
     border: 3px solid var(--primary);
   }
 `;
@@ -236,7 +239,14 @@ export default function RepresentativeList({ representatives }) {
           >
             {rep.photo_url && (
               <PhotoContainer>
-                <img src={rep.photo_url} alt={rep.name} />
+                <Image
+                  src={rep.photo_url}
+                  alt={rep.name}
+                  fill
+                  sizes="120px"
+                  style={{ objectFit: 'cover' }}
+                  priority={index < 2}
+                />
               </PhotoContainer>
             )}
             
