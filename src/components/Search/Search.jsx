@@ -1,11 +1,16 @@
 import React from 'react';
-import { SearchContainer, SearchMethods, SearchForm } from './Search.styles';
-import { Button } from '../common/Button/Button';
-import { Input } from '../common/Input/Input';
 import { useSearch } from '../../context/SearchContext';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { validators } from '../../utils/validators';
 import { RepresentService } from '../../services/representApi';
+import {
+  SearchContainer,
+  SearchMethods,
+  SearchForm,
+  Button,
+  Input,
+  ErrorMessage
+} from './Search.styles';
 
 export const Search = () => {
   const { state, dispatch } = useSearch();
@@ -14,6 +19,7 @@ export const Search = () => {
 
   const handleMethodChange = (method) => {
     dispatch({ type: 'SET_SEARCH_METHOD', payload: method });
+    dispatch({ type: 'SET_ERROR', payload: null });
   };
 
   const handlePostalSearch = async (e) => {
@@ -23,12 +29,14 @@ export const Search = () => {
     if (!validators.postalCode(postalCode)) {
       dispatch({ 
         type: 'SET_ERROR', 
-        payload: 'Please enter a valid postal code' 
+        payload: 'Please enter a valid postal code (e.g., A1A 1A1)' 
       });
       return;
     }
 
     dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
     try {
       const data = await RepresentService.getByPostalCode(postalCode);
       dispatch({ type: 'SET_RESULTS', payload: data });
@@ -41,6 +49,8 @@ export const Search = () => {
 
   const handleLocationSearch = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
     try {
       const position = await getLocation();
       const data = await RepresentService.getByLocation(
@@ -81,27 +91,32 @@ export const Search = () => {
             placeholder="Enter postal code (e.g., A1A 1A1)"
             pattern="[A-Za-z][0-9][A-Za-z] ?[0-9][A-Za-z][0-9]"
             aria-label="Postal code input"
+            autoFocus
             required
           />
-          <Button type="submit">
-            Find Representatives
+          <Button 
+            type="submit" 
+            variant="primary"
+            disabled={state.loading}
+          >
+            {state.loading ? 'Searching...' : 'Find Representatives'}
           </Button>
         </SearchForm>
       ) : (
         <Button 
           onClick={handleLocationSearch}
-          disabled={geoLoading}
-          className="location-button"
-          aria-busy={geoLoading}
+          disabled={geoLoading || state.loading}
+          variant="primary"
+          style={{ margin: '0 auto', display: 'block' }}
         >
-          {geoLoading ? 'Getting Location...' : 'Use Current Location'}
+          {geoLoading || state.loading ? 'Getting Location...' : 'Use Current Location'}
         </Button>
       )}
-
+      
       {state.error && (
-        <div className="error" role="alert">
+        <ErrorMessage role="alert">
           {state.error}
-        </div>
+        </ErrorMessage>
       )}
     </SearchContainer>
   );
