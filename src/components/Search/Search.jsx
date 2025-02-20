@@ -5,11 +5,14 @@ import { validators } from '../../utils/validators';
 import { RepresentService } from '../../services/representApi';
 import {
   SearchContainer,
+  SearchTitle,
   SearchMethods,
+  MethodCard,
   SearchForm,
   Button,
   Input,
-  ErrorMessage
+  ErrorMessage,
+  InfoMessage
 } from './Search.styles';
 
 export const Search = () => {
@@ -67,21 +70,30 @@ export const Search = () => {
 
   return (
     <SearchContainer>
+      <SearchTitle>How would you like to find your representatives?</SearchTitle>
+      
       <SearchMethods>
-        <Button
-          variant={searchMethod === 'postal' ? 'primary' : 'secondary'}
+        <MethodCard 
+          active={searchMethod === 'postal'}
           onClick={() => handleMethodChange('postal')}
-          aria-pressed={searchMethod === 'postal'}
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => e.key === 'Enter' && handleMethodChange('postal')}
         >
-          Search by Postal Code
-        </Button>
-        <Button
-          variant={searchMethod === 'location' ? 'primary' : 'secondary'}
+          <h3>Postal Code</h3>
+          <p>Enter your postal code to find representatives in your area</p>
+        </MethodCard>
+
+        <MethodCard
+          active={searchMethod === 'location'}
           onClick={() => handleMethodChange('location')}
-          aria-pressed={searchMethod === 'location'}
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => e.key === 'Enter' && handleMethodChange('location')}
         >
-          Use My Location
-        </Button>
+          <h3>Current Location</h3>
+          <p>Use your device's location to find representatives near you</p>
+        </MethodCard>
       </SearchMethods>
 
       {searchMethod === 'postal' ? (
@@ -96,21 +108,24 @@ export const Search = () => {
           />
           <Button 
             type="submit" 
-            variant="primary"
             disabled={state.loading}
           >
-            {state.loading ? 'Searching...' : 'Find Representatives'}
+            {state.loading ? 'Searching...' : 'Find My Representatives'}
           </Button>
         </SearchForm>
       ) : (
-        <Button 
-          onClick={handleLocationSearch}
-          disabled={geoLoading || state.loading}
-          variant="primary"
-          style={{ margin: '0 auto', display: 'block' }}
-        >
-          {geoLoading || state.loading ? 'Getting Location...' : 'Use Current Location'}
-        </Button>
+        <>
+          <InfoMessage>
+            <strong>Note:</strong> Your browser will ask for permission to access your location. 
+            This helps us find representatives in your area more accurately.
+          </InfoMessage>
+          <Button 
+            onClick={handleLocationSearch}
+            disabled={geoLoading || state.loading}
+          >
+            {geoLoading || state.loading ? 'Getting Location...' : 'Use My Current Location'}
+          </Button>
+        </>
       )}
       
       {state.error && (
