@@ -11,6 +11,10 @@ const nextConfig = {
     locales: ['en'],
     defaultLocale: 'en',
   },
+  // Speed Insights configuration
+  experimental: {
+    instrumentationHook: true
+  },
   async redirects() {
     return [];
   },
