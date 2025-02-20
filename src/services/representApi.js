@@ -1,49 +1,28 @@
-const BASE_URL = 'https://represent.opennorth.ca';
+const API_BASE_URL = 'https://represent.opennorth.ca/representatives';
 
-export const RepresentService = {
+class RepresentativeService {
   async getByPostalCode(postalCode) {
     try {
-      // Format postal code according to API requirements (uppercase, no spaces)
-      const formattedCode = postalCode.replace(/\s/g, '').toUpperCase();
-      
-      const response = await fetch(`${BASE_URL}/postcodes/${formattedCode}/`);
-      await this._checkRateLimit(response);
+      const formattedPostalCode = postalCode.replace(/\s/g, '');
+      const response = await fetch(`${API_BASE_URL}/postcode/${formattedPostalCode}`);
       
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('No representatives found for this postal code');
+        }
         throw new Error('Failed to fetch representatives');
       }
-      
+
       const data = await response.json();
-      
-      // Combine and deduplicate representatives from both centroid and concordance
-      const representatives = this._deduplicateRepresentatives(data);
-      
-      return {
-        representatives,
-        boundaries: {
-          centroid: data.boundaries_centroid || [],
-          concordance: data.boundaries_concordance || []
-        },
-        city: data.city,
-        province: data.province
-      };
+      return this.processApiResponse(data);
     } catch (error) {
-      if (error.message === 'Rate limit exceeded') {
-        throw error;
-      }
-      throw new Error('Unable to find representatives. Please check your postal code.');
+      throw new Error(error.message || 'Error fetching representatives by postal code');
     }
-  },
+  }
 
   async getByLocation(latitude, longitude) {
     try {
-      // Validate coordinates
-      if (!this._validateCoordinates(latitude, longitude)) {
-        throw new Error('Invalid coordinates provided');
-      }
-
-      const response = await fetch(`${BASE_URL}/representatives/?point=${latitude},${longitude}`);
-      await this._checkRateLimit(response);
+      const response = await fetch(`${API_BASE_URL}/point/${latitude},${longitude}`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -51,56 +30,48 @@ export const RepresentService = {
         }
         throw new Error('Failed to fetch representatives');
       }
-      
+
       const data = await response.json();
-      
-      // If no representatives found
-      if (!data.objects || data.objects.length === 0) {
-        throw new Error('No representatives found for this location. Please try a different location or use postal code search.');
-      }
-      
-      return {
-        representatives: data.objects,
-        meta: {
-          next: data.meta?.next,
-          previous: data.meta?.previous,
-          total_count: data.meta?.total_count,
-          boundary_url: data.meta?.boundary_url
-        }
-      };
+      return this.processApiResponse(data);
     } catch (error) {
-      if (error.message === 'Rate limit exceeded') {
-        throw error;
-      }
-      throw new Error(error.message || 'Unable to get representatives for your location.');
+      throw new Error(error.message || 'Error fetching representatives by location');
     }
-  },
-
-  async _checkRateLimit(response) {
-    if (response.status === 503) {
-      throw new Error('Rate limit exceeded. Please try again later. The API is limited to 60 requests per minute.');
-    }
-    return response;
-  },
-
-  _deduplicateRepresentatives(data) {
-    const allRepresentatives = [
-      ...(data.representatives_centroid || []),
-      ...(data.representatives_concordance || [])
-    ];
-
-    // Deduplicate by name since it's one of the guaranteed fields according to the API
-    return Array.from(
-      new Map(allRepresentatives.map(rep => [rep.name, rep])).values()
-    );
-  },
-
-  _validateCoordinates(lat, lng) {
-    return !isNaN(lat) && 
-           !isNaN(lng) && 
-           lat >= -90 && 
-           lat <= 90 && 
-           lng >= -180 && 
-           lng <= 180;
   }
-}; 
+
+  processApiResponse(data) {
+    if (!data || !Array.isArray(data.objects)) {
+      throw new Error('Invalid response format from the API');
+    }
+
+    // Sort representatives by level of government and role
+    const sortOrder = {
+      'Federal': 1,
+      'Provincial': 2,
+      'Municipal': 3,
+    };
+
+    const representatives = data.objects
+      .sort((a, b) => {
+        // First sort by level of government
+        const levelDiff = (sortOrder[a.representative_set_name] || 4) - 
+                         (sortOrder[b.representative_set_name] || 4);
+        
+        if (levelDiff !== 0) return levelDiff;
+        
+        // Then sort by role (Mayor first, then councillors)
+        if (a.elected_office.toLowerCase().includes('mayor')) return -1;
+        if (b.elected_office.toLowerCase().includes('mayor')) return 1;
+        
+        // Finally sort alphabetically by name
+        return a.name.localeCompare(b.name);
+      });
+
+    return {
+      representatives,
+      total: representatives.length,
+      boundary_set_name: data.meta?.boundary_set_name,
+    };
+  }
+}
+
+export const RepresentService = new RepresentativeService(); 

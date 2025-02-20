@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 
 export const useGeolocation = () => {
@@ -24,21 +26,29 @@ export const useGeolocation = () => {
           setLoading(false);
           switch (error.code) {
             case error.PERMISSION_DENIED:
-              reject(new Error('Please allow location access to use this feature'));
+              reject(new Error('Please allow access to your location to use this feature'));
               break;
             case error.POSITION_UNAVAILABLE:
               reject(new Error('Location information is unavailable'));
               break;
             case error.TIMEOUT:
-              reject(new Error('Location request timed out'));
+              reject(new Error('The request to get your location timed out'));
               break;
             default:
-              reject(new Error('An unknown error occurred'));
+              reject(new Error('An unknown error occurred while getting your location'));
           }
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
         }
       );
     });
   };
 
-  return { getLocation, loading };
+  return {
+    getLocation,
+    loading,
+  };
 }; 
