@@ -76,22 +76,6 @@ export const RepresentService = {
     }
   },
 
-  async getLocationFromIP() {
-    try {
-      const response = await fetch(ipApiUrl);
-      const data = await response.json();
-      return {
-        latitude: data.latitude,
-        longitude: data.longitude,
-        city: data.city,
-        region: data.region
-      };
-    } catch (error) {
-      console.error('Error getting location from IP:', error);
-      throw error;
-    }
-  },
-
   async _checkRateLimit(response) {
     if (response.status === 503) {
       throw new Error('Rate limit exceeded. Please try again later. The API is limited to 60 requests per minute.');
