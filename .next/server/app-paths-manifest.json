@@ -1,0 +1,7 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/learn/federal/page": "app/learn/federal/page.js",
+  "/learn/municipal/page": "app/learn/municipal/page.js",
+  "/learn/provincial/page": "app/learn/provincial/page.js",
+  "/page": "app/page.js"
+}

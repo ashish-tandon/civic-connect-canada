@@ -1,56 +1,47 @@
+'use client';
+
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
+  :root {
+    --bg-gradient: ${({ theme }) => `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.cardBg} 100%)`};
+    --text-gradient: ${({ theme }) => `linear-gradient(135deg, ${theme.colors.text} 0%, ${theme.colors.primary} 100%)`};
+    --primary: ${({ theme }) => theme.colors.primary};
+    --secondary: ${({ theme }) => theme.colors.secondary};
+    --bg-primary: ${({ theme }) => theme.colors.background};
+    --bg-secondary: ${({ theme }) => theme.colors.cardBg};
+    --text-primary: ${({ theme }) => theme.colors.text};
+    --text-secondary: ${({ theme }) => theme.colors.textLight};
+  }
+
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
-  html {
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
+  html,
   body {
     font-family: ${({ theme }) => theme.typography.fontFamily};
-    line-height: ${({ theme }) => theme.typography.lineHeights.normal};
-    color: ${({ theme }) => theme.colors.text};
     background-color: ${({ theme }) => theme.colors.background};
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: ${({ theme }) => theme.typography.fontWeights.bold};
-    line-height: ${({ theme }) => theme.typography.lineHeights.tight};
     color: ${({ theme }) => theme.colors.text};
-    margin-bottom: ${({ theme }) => theme.spacing.md};
-  }
-
-  p {
-    margin-bottom: ${({ theme }) => theme.spacing.md};
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   }
 
   a {
-    color: ${({ theme }) => theme.colors.primary};
+    color: inherit;
     text-decoration: none;
-    transition: color ${({ theme }) => theme.transitions.fast};
-
-    &:hover {
-      color: ${({ theme }) => theme.colors.primaryDark};
-    }
   }
 
   button {
+    cursor: pointer;
+    border: none;
+    background: none;
     font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
   }
 
-  input, textarea, select {
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
+  ul, ol {
+    list-style: none;
   }
 
   img {
@@ -58,14 +49,13 @@ export const GlobalStyles = createGlobalStyle`
     height: auto;
   }
 
-  ::selection {
-    background-color: ${({ theme }) => theme.colors.primary};
-    color: white;
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    line-height: 1.2;
   }
 
-  :focus-visible {
-    outline: 3px solid ${({ theme }) => `${theme.colors.primary}40`};
-    outline-offset: 2px;
+  p {
+    line-height: ${({ theme }) => theme.typography.body.lineHeight};
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {

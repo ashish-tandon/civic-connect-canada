@@ -1,30 +1,28 @@
-'use client';
-
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { ThemeProvider } from 'next-themes'
-import StyledComponentsRegistry from '../lib/registry'
-import { GlobalStyles } from '../styles/GlobalStyles'
+import { Providers } from './providers'
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'CivicConnect Canada',
   description: 'Your gateway to democratic engagement and civic participation in Canada',
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-        <StyledComponentsRegistry>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <GlobalStyles />
-            {children}
-            <SpeedInsights />
-          </ThemeProvider>
-        </StyledComponentsRegistry>
+      <body className={inter.className}>
+        <Providers>
+          {children}
+          <SpeedInsights />
+        </Providers>
       </body>
     </html>
-  )
+  );
 } 

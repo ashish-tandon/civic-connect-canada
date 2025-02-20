@@ -9,11 +9,8 @@ const nextConfig = {
     domains: ['localhost'],
     unoptimized: true,
   },
-  // Remove i18n config as it's deprecated in app directory
   experimental: {
-    instrumentationHook: true,
-    serverActions: true,
-    serverComponentsExternalPackages: ['@vercel/speed-insights']
+    instrumentationHook: true
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
