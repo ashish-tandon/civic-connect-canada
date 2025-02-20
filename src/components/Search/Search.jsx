@@ -1,93 +1,108 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { SearchContainer, SearchMethods, SearchForm } from './Search.styles';
+import { Button } from '../common/Button/Button';
+import { Input } from '../common/Input/Input';
+import { useSearch } from '../../context/SearchContext';
+import { useGeolocation } from '../../hooks/useGeolocation';
+import { validators } from '../../utils/validators';
 import { RepresentService } from '../../services/representApi';
 
-export function Search({ onResults, onLoading }) {
-  const [postalCode, setPostalCode] = useState('');
-  const [searchMethod, setSearchMethod] = useState('postal');
-  const [error, setError] = useState(null);
+export const Search = () => {
+  const { state, dispatch } = useSearch();
+  const { getLocation, loading: geoLoading } = useGeolocation();
+  const { searchMethod } = state;
+
+  const handleMethodChange = (method) => {
+    dispatch({ type: 'SET_SEARCH_METHOD', payload: method });
+  };
 
   const handlePostalSearch = async (e) => {
     e.preventDefault();
-    setError(null);
-    onLoading(true);
+    const postalCode = e.target.postalCode.value;
 
+    if (!validators.postalCode(postalCode)) {
+      dispatch({ 
+        type: 'SET_ERROR', 
+        payload: 'Please enter a valid postal code' 
+      });
+      return;
+    }
+
+    dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const data = await RepresentService.getByPostalCode(postalCode);
-      onResults(data);
+      dispatch({ type: 'SET_RESULTS', payload: data });
     } catch (err) {
-      setError(err.message);
+      dispatch({ type: 'SET_ERROR', payload: err.message });
     } finally {
-      onLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
   const handleLocationSearch = async () => {
-    setError(null);
-    onLoading(true);
-
+    dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      // Try browser geolocation first
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
-
-      const { latitude, longitude } = position.coords;
-      const data = await RepresentService.getByLocation(latitude, longitude);
-      onResults(data);
-    } catch (geoError) {
-      try {
-        // Fallback to IP-based location
-        const ipLocation = await RepresentService.getLocationFromIP();
-        const data = await RepresentService.getByLocation(
-          ipLocation.latitude,
-          ipLocation.longitude
-        );
-        onResults(data);
-      } catch (err) {
-        setError('Unable to determine your location. Please try postal code search.');
-      }
+      const position = await getLocation();
+      const data = await RepresentService.getByLocation(
+        position.latitude,
+        position.longitude
+      );
+      dispatch({ type: 'SET_RESULTS', payload: data });
+    } catch (err) {
+      dispatch({ type: 'SET_ERROR', payload: err.message });
     } finally {
-      onLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
   return (
     <SearchContainer>
       <SearchMethods>
-        <button
-          className={searchMethod === 'postal' ? 'active' : ''}
-          onClick={() => setSearchMethod('postal')}
+        <Button
+          variant={searchMethod === 'postal' ? 'primary' : 'secondary'}
+          onClick={() => handleMethodChange('postal')}
+          aria-pressed={searchMethod === 'postal'}
         >
           Search by Postal Code
-        </button>
-        <button
-          className={searchMethod === 'location' ? 'active' : ''}
-          onClick={() => setSearchMethod('location')}
+        </Button>
+        <Button
+          variant={searchMethod === 'location' ? 'primary' : 'secondary'}
+          onClick={() => handleMethodChange('location')}
+          aria-pressed={searchMethod === 'location'}
         >
           Use My Location
-        </button>
+        </Button>
       </SearchMethods>
 
       {searchMethod === 'postal' ? (
         <SearchForm onSubmit={handlePostalSearch}>
-          <input
-            type="text"
-            value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value.toUpperCase())}
+          <Input
+            name="postalCode"
             placeholder="Enter postal code (e.g., A1A 1A1)"
             pattern="[A-Za-z][0-9][A-Za-z] ?[0-9][A-Za-z][0-9]"
+            aria-label="Postal code input"
             required
           />
-          <button type="submit">Find Representatives</button>
+          <Button type="submit">
+            Find Representatives
+          </Button>
         </SearchForm>
       ) : (
-        <button onClick={handleLocationSearch} className="location-button">
-          Use Current Location
-        </button>
+        <Button 
+          onClick={handleLocationSearch}
+          disabled={geoLoading}
+          className="location-button"
+          aria-busy={geoLoading}
+        >
+          {geoLoading ? 'Getting Location...' : 'Use Current Location'}
+        </Button>
       )}
 
-      {error && <div className="error">{error}</div>}
+      {state.error && (
+        <div className="error" role="alert">
+          {state.error}
+        </div>
+      )}
     </SearchContainer>
   );
-} 
+}; 

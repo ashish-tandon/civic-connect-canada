@@ -2,17 +2,21 @@ import styled from 'styled-components';
 
 export const SearchContainer = styled.div`
   max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
+  margin: ${({ theme }) => theme.spacing.large} auto;
+  padding: ${({ theme }) => theme.spacing.large};
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 export const SearchMethods = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: ${({ theme }) => theme.spacing.medium};
+  margin-bottom: ${({ theme }) => theme.spacing.large};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    flex-direction: column;
+  }
 
   button {
     flex: 1;
@@ -38,7 +42,11 @@ export const SearchMethods = styled.div`
 
 export const SearchForm = styled.form`
   display: flex;
-  gap: 1rem;
+  gap: ${({ theme }) => theme.spacing.medium};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    flex-direction: column;
+  }
 
   input {
     flex: 1;

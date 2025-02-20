@@ -2,13 +2,13 @@ import styled from 'styled-components';
 
 export const AppContainer = styled.div`
   min-height: 100vh;
-  background: #f7fafc;
+  background: ${({ theme }) => theme.colors.background};
 `;
 
 export const Header = styled.header`
-  background: #2c5282;
+  background: ${({ theme }) => theme.colors.primary};
   color: white;
-  padding: 3rem 1rem;
+  padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
   text-align: center;
 
   h1 {
@@ -18,14 +18,14 @@ export const Header = styled.header`
   }
 
   p {
-    margin: 1rem 0 0;
+    margin: ${({ theme }) => theme.spacing.medium} 0 0;
     font-size: 1.1rem;
     opacity: 0.9;
   }
 `;
 
 export const Main = styled.main`
-  padding: 2rem 1rem;
-  max-width: 1200px;
+  padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
+  max-width: 1400px;
   margin: 0 auto;
 `; 
