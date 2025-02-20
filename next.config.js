@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   swcMinify: true,
   compiler: {
@@ -10,18 +11,7 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    instrumentationHook: true
-  },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
-    }
-    return config;
+    serverActions: true
   },
   async headers() {
     return [
