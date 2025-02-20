@@ -6,8 +6,21 @@ const List = styled.ul`
   padding: 0;
   margin: 2rem 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.wide}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 `;
 
 const Card = styled.li`
@@ -16,6 +29,9 @@ const Card = styled.li`
   box-shadow: ${({ theme }) => theme.shadows.medium};
   padding: 2rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     transform: translateY(-4px);
